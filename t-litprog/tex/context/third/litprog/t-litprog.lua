@@ -10,12 +10,39 @@ modules ['t-litprog'] = {
     license   = "MIT License"
 }
 
+local tConcat = table.concat
+local tInsert = table.insert
+
 local context = context
 local verbatim = context.verbatim
 
 local thirddata   = thirddata or {}
 thirddata.litProg = thirddata.litProg or {}
 local litProg     = thirddata.litProg
+
+local function createFixLitProgs(theLitProgsName)
+  -- \let\oldstart{{=theLitProgsName}}=\start{{=theLitProgsName}}
+  -- \def\start{{=theLitProgsName}}#1{
+  --   \oldStart{{=theLitProgsName}}  
+  -- }
+  local theTeX = {}
+  tInsert(theTeX, '\\let\\oldStart')
+  tInsert(theTeX, theLitProgsName)
+  tInsert(theTeX, '=\\start')
+  tInsert(theTeX, theLitProgsName)
+  tInsert(theTeX, '\\def\\start')
+  tInsert(theTeX, theLitProgsName)
+  tInsert(theTeX, '#1{\\color[gray]{{\\bf ')
+  tInsert(theTeX, theLitProgsName)
+  tInsert(theTeX, '}: #1}\\oldStart')
+  tInsert(theTeX, theLitProgsName)
+  tInsert(theTeX, '}')
+  local theTeXStr = tConcat(theTeX)
+  tex.print(theTeXStr)
+  return theTeXStr
+end
+
+litProg.createFixLitProgs = createFixLitProgs
 
 litProg.cCodeWords = {}
 

@@ -49,7 +49,9 @@
 % see: https://www.contextgarden.net/Command/definetextbackground
 
 \def\lpicSingleArgRelax[#1]{\relax}
+\def\lpicTSingleArgRelax#1{\relax}
 \def\lpicDoubleArgRelax[#1][#2]{\relax}
+\def\lpicTDoubleArgRelax#1#2{\relax}
 
 \def\copyrightOwner{\dosingleempty\lpicSingleArgRelax}
 
@@ -62,48 +64,99 @@
 
 % see: https://wiki.contextgarden.net/Verbatim_text
 
-\definetyping%
+\def\fixLitProgs#1{\directlua{thirddata.litProg.createFixLitProgs('#1')}}
+
+\unexpanded\def\defineLitProgs{
+  \dotripleempty\doDefineLitProgs
+}
+
+\unexpanded\def\doDefineLitProgs[#1][#2][#3]{
+  \ifthirdargument%
+    \doDefineLitProgsTriple{#1}{#2}{#3}%
+  \else\ifsecondargument%
+    \doDefineLitProgsDouble{#1}{#2}%
+  \else\iffirstargument%
+    \doDefineLitProgsSingle{#1}%
+  \else%
+    \doDefineLitProgsZero%
+  \fi\fi\fi%
+}
+
+\unexpanded\def\doDefineLitProgsTriple#1#2#3{
+  \definetyping[#1][#2][#3]
+  \fixLitProgs{#1}
+}
+
+\unexpanded\def\doDefineLitProgsDouble#1#2{
+  \definetyping[#1][#2]
+  \fixLitProgs{#1}
+}
+
+\unexpanded\def\doDefineLitProgsSingle#1{
+  \definetyping[#1]
+  \fixLitProgs{#1}
+}
+
+\unexpanded\def\doDefineLitProgsZero{
+  \errmessage{
+    \string\\defineLitProgs
+    requires at least one argument,
+    you have provided none.
+  }
+}
+
+\defineLitProgs%
   [MkIVCode]%
   [ option=TEX, numbering=line, tab=2,
     before={\noindent\startLitProgFrame}, after=\stopLitProgFrame
   ]
 
-\definetyping%
+\defineLitProgs%
   [MpIVCode]%
   [ option=MP, numbering=line, tab=2,
     before={\noindent\startLitProgFrame}, after=\stopLitProgFrame
   ]
 
-\definetyping%
+\defineLitProgs%
   [LuaCode]%
   [option=LUA, numbering=line, tab=2,
     before={\noindent\startLitProgFrame}, after=\stopLitProgFrame
   ]
 
-\definetyping%
+\defineLitProgs%
   [LuaTemplate]%
   [option=LUA, numbering=line, tab=2,
     before={\noindent\startLitProgFrame}, after=\stopLitProgFrame
   ]
 
-\def\defaultCHeaderLicense{\dosingleempty\lpicSingleArgRelax}
-\def\createsCHeader{\dodoubleempty\lpicDoubleArgRelax}
-\def\addCHeaderLicense{\dodoubleempty\lpicDoubleArgRelax}
+%\def\defaultCHeaderLicense{\dosingleempty\lpicSingleArgRelax}
+%\def\createsCHeader{\dodoubleempty\lpicDoubleArgRelax}
+%\def\addCHeaderLicense{\dodoubleempty\lpicDoubleArgRelax}
 
-\definetyping%
+\defineLitProgs%
   [CHeader]%
   [option=CPP, numbering=line, tab=2,
     before={\noindent\startLitProgFrame}, after=\stopLitProgFrame
   ]
+\defineLitProgs%
+  [CppHeader]%
+  [option=CPP, numbering=line, tab=2,
+    before={\noindent\startLitProgFrame}, after=\stopLitProgFrame
+  ]
 
-\def\defaultCCodeLicense{\dosingleempty\lpicSingleArgRelax}
-\def\buildsCCodeLibrary{\dodoubleempty\lpicDoubleArgRelax}
-\def\buildsCCodeApplication{\dodoubleempty\lpicDoubleArgRelax}
-\def\createsCCode{\dodoubleempty\lpicDoubleArgRelax}
-\def\addCCodeLicense{\dodoubleempty\lpicDoubleArgRelax}
+%\def\defaultCCodeLicense{\dosingleempty\lpicSingleArgRelax}
+%\def\buildsCCodeLibrary{\dodoubleempty\lpicDoubleArgRelax}
+%\def\buildsCCodeApplication{\dodoubleempty\lpicDoubleArgRelax}
+%\def\createsCCode{\dodoubleempty\lpicDoubleArgRelax}
+%\def\addCCodeLicense{\dodoubleempty\lpicDoubleArgRelax}
 
-\definetyping%
+\defineLitProgs%
   [CCode]%
+  [option=CPP, numbering=line, tab=2,
+    before={\noindent\startLitProgFrame}, after=\stopLitProgFrame
+  ]
+\defineLitProgs%
+  [CppCode]%
   [option=CPP, numbering=line, tab=2,
     before={\noindent\startLitProgFrame}, after=\stopLitProgFrame
   ]
@@ -119,3 +172,8 @@
 %  [option=LUA, numbering=line, tab=2,
 %    before={\noindent\startLitProgFrame}, after=\stopLitProgFrame
 %  ]
+
+\def\startDescription#1#2{\startitemize}
+\def\creates#1#2{\item creates: #2 of type {\bf #1}}
+\def\requires#1#2{\item requires: #2 of type {\bf #1}}
+\def\stopDescription{\stopitemize}
